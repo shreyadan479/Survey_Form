@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Results</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(
+                97.86deg,
+                #4a148c 0%, /* Dark Purple */
+                #512da8 53.65%, /* Purple */
+                #7b1fa2 100% /* Deep Purple */
+            );
+            margin: 0;
+            padding: 0;
+            display: grid;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .results-container {
+            width: 80%;
+            max-width: 600px;
+            padding: 20px;
+            border-radius: 18px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
+            
+            color: #333; /* Dark text color */
+        }
+
+        h1 {
+            text-align: center;
+            color: #ccc; /* Purple header text */
+            margin-bottom: 20px;
+        }
+
+        .question-container {
+            margin-bottom: 20px;
+        }
+
+        .question {
+            margin-bottom: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ce6262; /* Purple question text */
+        }
+
+        .response {
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #fff;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .option {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="results-container">
+        <h1>Survey Results</h1>
+        <canvas id="response-chart" width="400" height="200"></canvas>
+
+        <div id="results-container"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedResponses = urlParams.get('responses');
+            const userResponses = JSON.parse(decodeURIComponent(encodedResponses));
+
+            const resultsContainer = document.getElementById('results-container');
+
+            userResponses.forEach((response, index) => {
+                const responseContainer = document.createElement('div');
+                responseContainer.className = 'question-container';
+
+                const questionElement = document.createElement('div');
+                questionElement.className = 'question';
+                questionElement.innerHTML = `<p>${index + 1}. ${response.question}</p>`;
+
+                const responseElement = document.createElement('div');
+                responseElement.className = 'response';
+
+                if (Array.isArray(response.response)) {
+                    // For checkbox type
+                    responseElement.innerHTML = `<p><strong>Response:</strong></p>`;
+                    const optionsList = document.createElement('ul');
+                    optionsList.className = 'options-list';
+
+                    response.response.forEach((option, optionIndex) => {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'option';
+                        listItem.textContent = `${String.fromCharCode(65 + optionIndex)}. ${option}`;
+                        optionsList.appendChild(listItem);
+                    });
+
+                    responseElement.appendChild(optionsList);
+                } else {
+                    // For other types
+                    responseElement.innerHTML = `<p><strong>Response:</strong> ${response.response}</p>`;
+                }
+
+                responseContainer.appendChild(questionElement);
+                responseContainer.appendChild(responseElement);
+
+                resultsContainer.appendChild(responseContainer);
+            });
+            const analyzeResponses = () => {
+                const chartData = {
+                    labels: [],
+                    data: []
+                };
+    
+                userResponses.forEach((response, index) => {
+                    if (Array.isArray(response.response)) {
+                        // Analyze multiple-choice question responses
+                        response.response.forEach((option, optionIndex) => {
+                            const label = `${String.fromCharCode(65 + optionIndex)}. ${option}`;
+                            const existingIndex = chartData.labels.indexOf(label);
+    
+                            if (existingIndex === -1) {
+                                chartData.labels.push(label);
+                                chartData.data.push(1);
+                            } else {
+                                chartData.data[existingIndex]++;
+                            }
+                        });
+                    }
+                });
+    
+                // Create a bar chart
+                const ctx = document.getElementById('response-chart').getContext('2d');
+                const responseChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            label: 'Number of Responses',
+                            data: chartData.data,
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1,
+                            barPercentage: 0.8, // Adjust the bar width (percentage of category width)
+                            categoryPercentage: 0.6,
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        },
+                    },
+                    
+                });
+            };
+    
+            // Call the function to analyze responses and create a chart
+            analyzeResponses();
+        });
+    </script>
+</body>
+</html>

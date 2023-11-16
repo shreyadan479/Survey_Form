@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Display</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(
+                97.86deg,
+                #a509ff 0%,
+                #34acc7 53.65%,
+                #a134c7 100%
+            );
+            margin: 0;
+            padding: 0;
+            display: grid;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .survey-container {
+            width: 80%;
+            max-width: 600px;
+            padding: 20px;
+            border-radius: 18px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
+        }
+
+        h1 {
+            text-align: center;
+            color: #ccc;
+            text-decoration: underline;
+            margin-bottom: 20px;
+        }
+
+        .question-container {
+            margin-bottom: 20px;
+        }
+
+        .question {
+            margin-bottom: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .options-container {
+            display: flex;
+        }
+
+        input[type="text"],
+        input[type="radio"],
+        input[type="checkbox"] {
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        label {
+            margin-left: 5px;
+        }
+
+        button {  
+            background: linear-gradient(
+                97.86deg,
+                #a509ff 0%,
+                #34acc7 53.65%,
+                #a134c7 100%
+            );
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        button:hover {
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.75);
+        }
+    </style>
+</head>
+<body>
+    <div class="survey-container">
+        <h1>Survey Questions</h1>
+
+        <form id="response-form">
+            <div id="questions-container"></div>
+
+            <button type="button" id="submit-survey">Submit Survey</button>
+        </form>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const encodedData = urlParams.get('data');
+        const surveyData = JSON.parse(decodeURIComponent(encodedData));
+
+        const questionsContainer = document.getElementById('questions-container');
+
+        // Display survey title
+        const titleElement = document.createElement('h1');
+        titleElement.textContent = surveyData.title;
+        questionsContainer.appendChild(titleElement);
+
+        // Display survey questions and answer spaces
+        surveyData.questions.forEach((question, index) => {
+            const questionContainer = document.createElement('div');
+            questionContainer.className = 'question-container';
+
+            const questionElement = document.createElement('div');
+            questionElement.className = 'question';
+            questionElement.innerHTML = `<p>${index + 1}. ${question.text}</p>`;
+
+            questionContainer.appendChild(questionElement);
+
+            if (question.type === 'text') {
+                const textResponse = document.createElement('input');
+                textResponse.type = 'text';
+                textResponse.name = `response-${index}`;
+                textResponse.placeholder = 'Your answer...';
+                questionContainer.appendChild(textResponse);
+            } else if (question.type === 'multiple-choice') {
+                const optionsContainer = document.createElement('div');
+                optionsContainer.className = 'options-container';
+
+                question.options.forEach((option, optionIndex) => {
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = `response-${index}`;
+                    radio.value = option.value;
+
+                    const label = document.createElement('label');
+                    label.textContent = `${String.fromCharCode(65 + optionIndex)}. ${option.text}`;
+
+                    optionsContainer.appendChild(radio);
+                    optionsContainer.appendChild(label);
+                });
+
+                questionContainer.appendChild(optionsContainer);
+            } else if (question.type === 'checkbox') {
+                const optionsContainer = document.createElement('div');
+                optionsContainer.className = 'options-container';
+
+                question.options.forEach((option, optionIndex) => {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.name = `response-${index}-${optionIndex}`;
+                    checkbox.value = option.value;
+
+                    const label = document.createElement('label');
+                    label.textContent = `${String.fromCharCode(65 + optionIndex)}. ${option.text}`;
+
+                    optionsContainer.appendChild(checkbox);
+                    optionsContainer.appendChild(label);
+                });
+
+                questionContainer.appendChild(optionsContainer);
+            }
+
+            questionsContainer.appendChild(questionContainer);
+        });
+
+        const submitButton = document.getElementById('submit-survey');
+        submitButton.addEventListener('click', () => {
+            // Collect and handle user responses
+            const userResponses = [];
+            surveyData.questions.forEach((question, index) => {
+                const responseElement = document.querySelector(`[name="response-${index}"]`);
+
+                if (question.type === 'text') {
+                    userResponses.push({
+                        question: question.text,
+                        response: responseElement.value
+                    });
+                } else if (question.type === 'multiple-choice' || question.type === 'checkbox') {
+                    const selectedOptions = Array.from(document.querySelectorAll(`[name^="response-${index}"]:checked`))
+                        .map(opt => {
+                            const optionIndex = parseInt(opt.value, 10) - 1;
+                            return question.options[optionIndex].text;
+                        });
+
+                    userResponses.push({
+                        question: question.text,
+                        response: selectedOptions
+                    });
+                }
+            });
+
+            // Redirect to the results HTML page and pass the responses as a query parameter
+            const resultsPageURL = `results.html?responses=${encodeURIComponent(JSON.stringify(userResponses))}`;
+            window.location.href = resultsPageURL;
+            
+        });
+    });
+</script>
+
+</body>
+</html>

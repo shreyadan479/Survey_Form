@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Creation Platform</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(
+            97.86deg,
+            #a509ff 0%,
+            #34acc7 53.65%,
+            #a134c7 100%
+            );
+            margin: 0;
+            padding: 0;
+            display: grid;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 400px;
+            padding: 20px;
+            
+            border-radius: 18px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #ccc;
+            text-decoration: underline;
+        }
+
+        .question {
+            margin-bottom: 20px;
+        }
+
+        .question label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .question input[type="text"],
+        .question select {
+            width: calc(100% - 10px);
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+
+        #questions {
+            list-style: none;
+            padding: 0;
+        }
+
+        #questions li {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            
+        }
+
+        .btn-group {
+            text-align: center;
+        }
+
+        button {
+            background: linear-gradient(
+            97.86deg,
+            #a509ff 0%,
+            #34acc7 53.65%,
+            #a134c7 100%
+            );
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 10px;
+            display: inline-block;
+            margin: 5px 5px;
+        }
+
+        button:hover {
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.75);
+        }
+        .option-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .option-container input {
+            margin-right: 5px;
+            width: 15%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Create a Survey</h1>
+        </div>
+        <form id="survey-form">
+            <div class="question">
+                <label for="survey-title">Survey Title:</label>
+                <input type="text" id="survey-title" name="survey-title" required placeholder="Enter the survey title">
+            </div>
+
+            <ul id="questions">
+                <!-- Questions will be added here dynamically -->
+            </ul>
+
+            <div class="btn-group">
+                <button type="button" id="add-question">Add Question</button>
+                <button type="submit" id="create-survey">Create Survey</button>
+                <button id="display-survey">Display Survey Questions</button>
+            </div>
+            
+        </form>
+         
+    </div>
+
+    <script>
+        const addQuestionButton = document.getElementById('add-question');
+        const questionsList = document.getElementById('questions');
+        let questionCount = 0;
+    
+        addQuestionButton.addEventListener('click', () => {
+            questionCount++;
+            const newQuestion = document.createElement('li');
+            newQuestion.innerHTML = `
+                <div class="question">
+                    <label for="question-${questionCount}">Question ${questionCount}:</label>
+                    <input type="text" id="question-${questionCount}" name="question-${questionCount}" required placeholder="Enter the question">
+                    <select name="question-type-${questionCount}" id="question-type-${questionCount}" onchange="updateOptions(${questionCount})">
+                        <option value="text">Text</option>
+                        <option value="multiple-choice">Multiple Choice</option>
+                        <option value="checkbox">Checkbox</option>
+                    </select>
+                    <div id="options-container-${questionCount}" class="options-container"></div>
+                </div>
+            `;
+            questionsList.appendChild(newQuestion);
+        });
+    
+        function updateOptions(questionNumber) {
+            const questionType = document.getElementById(`question-type-${questionNumber}`).value;
+            const optionsContainer = document.getElementById(`options-container-${questionNumber}`);
+            optionsContainer.innerHTML = ''; // Clear previous options
+        
+            if (questionType === 'multiple-choice') {
+                for (let i = 1; i <= 4; i++) {
+                    const optionContainer = document.createElement('div');
+                    optionContainer.className = 'option-container';
+        
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = `option-${questionNumber}`;
+                    radio.id = `option-${questionNumber}-${i}`;
+        
+                    const labelInput = document.createElement('input');
+                    labelInput.type = 'text';
+                    labelInput.placeholder = `Option ${i} Label`;
+                            
+                    optionContainer.appendChild(radio);
+                    optionContainer.appendChild(labelInput);
+        
+                    optionsContainer.appendChild(optionContainer);
+                }
+            }
+            else if (questionType === 'checkbox') {
+                for (let i = 1; i <= 4; i++) {
+                    const optionContainer = document.createElement('div');
+                    optionContainer.className = 'option-container';
+        
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.name = `option-${questionNumber}`;
+                    checkbox.id = `option-${questionNumber}-${i}`;
+        
+                    const labelInput = document.createElement('input');
+                    labelInput.type = 'text';
+                    labelInput.placeholder = `Option ${i} Label`;
+        
+                    optionContainer.appendChild(checkbox);
+                    optionContainer.appendChild(labelInput);
+        
+                    optionsContainer.appendChild(optionContainer);
+                }
+            }
+        }        
+    
+        const surveyForm = document.getElementById('survey-form');
+        surveyForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+    
+            // Store survey data in local storage
+            const surveyData = {
+                title: document.getElementById('survey-title').value,
+                questions: []
+            };
+    
+            for (let i = 1; i <= questionCount; i++) {
+                surveyData.questions.push({
+                    text: document.getElementById(`question-${i}`).value,
+                    type: document.querySelector(`[name="question-type-${i}"]`).value,
+                    options: getOptions(i)
+                });
+            }
+    
+            localStorage.setItem('survey', JSON.stringify(surveyData));
+            alert('Survey created and stored in local storage.');
+        });
+    
+        function getOptions(questionNumber) {
+            const questionType = document.getElementById(`question-type-${questionNumber}`).value;
+            const options = [];
+    
+            if (questionType === 'multiple-choice' || questionType === 'checkbox' || questionType === 'radio') {
+                for (let i = 1; i <= 4; i++) {
+                    options.push({
+                        text: document.getElementById(`option-${questionNumber}-${i}`).value,
+                        value: i
+                    });
+                }
+            }
+    
+            return options;
+        }
+        
+    
+        const displaySurveyButton = document.getElementById('display-survey');
+    displaySurveyButton.addEventListener('click', () => {
+        const surveyData = {
+            title: document.getElementById('survey-title').value,
+            questions: []
+        };
+
+        for (let i = 1; i <= questionCount; i++) {
+            const questionElement = document.getElementById(`question-${i}`);
+            const questionType = document.querySelector(`[name="question-type-${i}"]`).value;
+
+            const options = [];
+
+            if (questionType === 'multiple-choice' || questionType === 'checkbox') {
+                const optionInputs = document.querySelectorAll(`[name="option-${i}"]`);
+                optionInputs.forEach((input, index) => {
+                    const optionText = input.nextSibling.value;
+                    options.push({ text: optionText, value: index + 1 });
+                });
+            }
+
+            surveyData.questions.push({
+                text: questionElement.value,
+                type: questionType,
+                options: options
+            });
+        }
+
+        const encodedData = encodeURIComponent(JSON.stringify(surveyData));
+        const surveyURL = `display_survey.html?data=${encodedData}`;
+        window.location.href = surveyURL;
+    });
+
+        const responseContainer = document.getElementById('response-container');
+
+            function displayResponses(responses) {
+                responseContainer.innerHTML = '<h2>Survey Responses</h2>';
+
+                responses.forEach((response, index) => {
+                    const responseElement = document.createElement('div');
+                    responseElement.innerHTML = `<p><strong>${index + 1}. ${response.question}</strong><br>${response.response}</p>`;
+                    responseContainer.appendChild(responseElement);
+                });
+            }
+    </script>    
+    
+</body>
+</html>

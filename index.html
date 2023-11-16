@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(
+            97.86deg,
+            #a509ff 0%,
+            #34acc7 53.65%,
+            #a134c7 100%
+            );
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            
+        }
+
+        .container {
+            max-width: 400px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container h1 {
+            font-size: 24px;
+            text-decoration: underline;
+            color: #ccc;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="password"] {
+            width: 80%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
+            border-radius: 10px;
+        }
+
+        .btn-group {
+            text-align: center;
+        }
+
+        button {
+            background: linear-gradient(
+            97.86deg,
+            #a509ff 0%,
+            #34acc7 53.65%,
+            #a134c7 100%
+            );
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                width: 90%;
+            }
+            .question input[type="text"],
+            .question select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>User Registration</h1>
+        <form id="registration-form" action="/front.html" method="post">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" onclick="func()">Register</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const registrationForm = document.getElementById('registration-form');
+        registrationForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // You can handle user registration logic here, e.g., storing user data in local storage or making an API call to your backend.
+
+            alert('User registered successfully! You can now log in.');
+        });
+        function func(){
+            window.location.href = 'front.html';
+        }
+    </script>
+</body>
+</html>
